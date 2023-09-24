@@ -1,2 +1,2 @@
-import './sccs/index.scss'
+import './style/index.scss'
 console.log('working!')
