@@ -26,6 +26,35 @@ const jsLoaders = () => {
   return loaders
 }
 
+
+/**
+ * Resolve tsconfig.json paths to Webpack aliases
+ * @param  {string} tsconfigPath           - Path to tsconfig
+ * @param  {string} webpackConfigBasePath  - Path from tsconfig to Webpack config to create absolute aliases
+ * @return {object}                        - Webpack alias config
+ */
+function resolveTsconfigPathsToAlias({
+  tsconfigPath = './tsconfig.json',
+  webpackConfigBasePath = __dirname,
+} = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { paths } = require(tsconfigPath).compilerOptions;
+
+  const aliases = {};
+
+  Object.keys(paths).forEach((item) => {
+    const key = item.replace('/*', '');
+    const value = path.resolve(webpackConfigBasePath, paths[item][0].replace('/*', '').replace('*', ''));
+
+    aliases[key] = value;
+  });
+
+  return aliases;
+}
+
+module.exports = resolveTsconfigPathsToAlias;
+
+
 module.exports = {
   context: path.resolve(__dirname, 'src'),
   mode: 'development',
@@ -36,10 +65,6 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '@core': path.resolve(__dirname, 'src/core'),
-    },
   },
   devtool: isDev ? 'source-map' : false,
   devServer: {
